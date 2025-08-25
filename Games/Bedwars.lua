@@ -1,4 +1,4 @@
-
+------Button References------
 FlyCounter = buttons.FlyCounter
 FlyCounterInner = buttons.FlyCounterInner
 FlyCounterText = buttons.FlyCounterText
@@ -7,8 +7,7 @@ UpButton = buttons.UpButton
 LongjumpButton = buttons.LongjumpButton
 InfFlyButton = buttons.InfFlyButton
 FlyButton = buttons.FlyButton
-
---module = shared.functions
+------Module Imports------
 local bedwars = module.bedwars
 local SwordAnimations = module.SwordAnimations
 local SetCamera = module.SetCamera
@@ -44,30 +43,28 @@ local RavenEquippedKit = module.RavenEquippedKit
 local getShopItem = module.getShopItem
 local buyremote = module.buyremote
 
---Locals
-
+------Services------
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UIS = game:GetService("UserInputService")
-local HttpService = game:service('HttpService')
+local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-
 local Camera = game:GetService("Workspace").CurrentCamera
 local RunService = game:GetService("RunService")
 local collectionService = game:GetService("CollectionService")
 
-local viewmodel = workspace.CurrentCamera:WaitForChild('Viewmodel').RightHand.RightWrist
+------Locals------
+local viewmodel = workspace.CurrentCamera:WaitForChild("Viewmodel").RightHand.RightWrist
 local viewmodelcopy = viewmodel.C0
 local oldviewmodel = viewmodel.C0
 local Anim = nil
 local animcompleted = true
 local KillauraViewAngle = 360
 local KillauraWallCheck = false
-local AnimationOptionsKillaura = 'Remade'
+local AnimationOptionsKillaura = "Remade"
 local KillauraRange = 20
 local AttackMobdsEnabled = true
-local root = nil
 local Boxes = {}
 local TransperancyValue = 50
 local AttackDelay = 0.5
@@ -75,8 +72,9 @@ local lastAttackTime = 0
 local animationdelay = tick()
 local swordAnimation = Instance.new("Animation")
 swordAnimation.AnimationId = "rbxassetid://4947108314"
-
 local loop = LoopManager.new()
+
+------Killaura Module------
 Killaura = Combat:CreateToggle({
 	Name = "Killaura",
 	Callback = function(Callback)
@@ -142,7 +140,7 @@ Killaura = Combat:CreateToggle({
 						return
 					end
 				end
-				if AnimationOptionsKillaura == 'Normal' and animationdelay <= tick() then
+				if AnimationOptionsKillaura == "Normal" and animationdelay <= tick() then
 					animationdelay = tick() + 0.18
 					bedwars["SwordController"]:playSwordEffect(sword.tool.Name, false)
 				end
@@ -152,20 +150,18 @@ Killaura = Combat:CreateToggle({
 				local cursdirection = CFrame.lookAt(selfpos, rootpos).LookVector
 				local cameraposition = selfpos + cursdirection * math.max(mag - 14.4, 0)
 				local chargedmeta = bedwars["ItemMeta"][sword.tool.Name]
-				if workspace:GetServerTimeNow() - lastAttackTime >= AttackDelay then
-					bedwars["SwordController"].lastAttack = workspace:GetServerTimeNow()
-					bedwars["SwordController"].lastAttackTimeDelta = workspace:GetServerTimeNow() - lastAttackTime
-					bedwars["SwordController"].lastAttackTime = workspace:GetServerTimeNow()
-					lastAttackTime = bedwars["SwordController"].lastAttackTime
-					for i = 0, 5, 1 do 
-						task.wait()
-						sendattackfire(sword, isMonster, isMonster and target or nil, not isMonster and target or nil, selfpos, rootpos, cursdirection, cameraposition, chargedmeta)
-					end
+				bedwars["SwordController"].lastAttack = workspace:GetServerTimeNow()
+				bedwars["SwordController"].lastAttackTimeDelta = workspace:GetServerTimeNow() - lastAttackTime
+				bedwars["SwordController"].lastAttackTime = workspace:GetServerTimeNow()
+				--lastAttackTime = bedwars["SwordController"].lastAttackTime
+				for i = 0, 5, 1 do 
+					task.wait()
+					sendattackfire(sword, isMonster, isMonster and target or nil, not isMonster and target or nil, selfpos, rootpos, cursdirection, cameraposition, chargedmeta)
 				end
 				if LockinKilaura then
 					rotateTo(rootpos)
 				end
-				if animcompleted and AnimationOptionsKillaura ~= 'None' and AnimationOptionsKillaura ~= 'Normal' then
+				if animcompleted and AnimationOptionsKillaura ~= "None" and AnimationOptionsKillaura ~= "Normal" then
 					for i, v in next, SwordAnimations[AnimationOptionsKillaura] do
 						if workspace.CurrentCamera.Viewmodel and viewmodel then
 							animcompleted = false
@@ -220,9 +216,7 @@ Killaura:CreateDropDown({
 		Targetoptions = Callback
 	end
 })
-local killauraanimationarray = {
-	"Normal"
-}
+local killauraanimationarray = {"Normal"}
 for i, v in next, SwordAnimations do
 	table.insert(killauraanimationarray, i)
 end
@@ -257,7 +251,7 @@ Killaura:CreateToggle({
 	Name = "Show target",
 	Callback = function(Callback)
 		if Callback then
-			local box = Instance.new('BoxHandleAdornment')
+			local box = Instance.new("BoxHandleAdornment")
 			box.Adornee = nil
 			box.AlwaysOnTop = true
 			box.Size = Vector3.new(3, 5, 3)
@@ -270,7 +264,7 @@ Killaura:CreateToggle({
 		end
 	end
 })
-Killaura:CreateSlider({
+--[[Killaura:CreateSlider({
 	Name = "Attack Delay",
 	Default = 50,
 	Min = 0,
@@ -278,7 +272,7 @@ Killaura:CreateSlider({
 	Callback = function(Callback)
 		AttackDelay = Callback / 100
 	end
-})
+})]]
 Killaura:CreateSlider({
 	Name = "Transperancy",
 	Default = 50,
@@ -321,6 +315,8 @@ Killaura:CreateToggle({
 		ToolcheckKillaura = Callback
 	end
 })
+
+------TargetHud Module------
 TargetHudModule = Client:CreateToggle({
 	Name = "Target Hud",
 	Callback = function(Callback)
@@ -330,44 +326,24 @@ TargetHudModule = Client:CreateToggle({
 				local shouldShowHud = false
 				if GetMatchState() == 1 then
 					local GetClosestPlayer = GetClosest()
-					if GetClosestPlayer and 
-                       GetClosestPlayer.Team ~= LocalPlayer.Team and 
-                       IsAlive(GetClosestPlayer) and 
-                       IsAlive(LocalPlayer) and 
-                       not GetClosestPlayer.Character:FindFirstChildOfClass("ForceField") then
-						local Magnitude = (GetClosestPlayer.Character.HumanoidRootPart.Position - 
-                                          LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+					if GetClosestPlayer and GetClosestPlayer.Team ~= LocalPlayer.Team and IsAlive(GetClosestPlayer) and IsAlive(LocalPlayer) and not GetClosestPlayer.Character:FindFirstChildOfClass("ForceField") then
+						local Magnitude = (GetClosestPlayer.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
 						if Magnitude < TargetHudRange then
 							shouldShowHud = true
 							pcall(function()
 								shared.TargetHud.Visible = true
 								shared.TargetName.Text = GetClosestPlayer.Name
 								shared.TargetName.TextColor3 = GetClosestPlayer.TeamColor.Color
-								shared.TargetState.Text = GetClosestPlayer.Character.Humanoid.Health <=
-                                    LocalPlayer.Character.Humanoid.Health and "W" or "L"
-								shared.TargetState.TextColor3 = GetClosestPlayer.Character.Humanoid.Health <=
-                                    LocalPlayer.Character.Humanoid.Health and Color3.fromRGB(34, 255, 0) or
-                                    Color3.fromRGB(255, 5, 22)
+								shared.TargetState.Text = GetClosestPlayer.Character.Humanoid.Health <= LocalPlayer.Character.Humanoid.Health and "W" or "L"
+								shared.TargetState.TextColor3 = GetClosestPlayer.Character.Humanoid.Health <= LocalPlayer.Character.Humanoid.Health and Color3.fromRGB(34, 255, 0) or Color3.fromRGB(255, 5, 22)
 								shared.TargetColor.TextColor3 = GetClosestPlayer.TeamColor.Color
-								shared.TargetColor.Text = GetClosestPlayer.TeamColor and
-                                    tostring(string.sub(tostring(GetClosestPlayer.TeamColor), 1, 1)) or ""
+								shared.TargetColor.Text = GetClosestPlayer.TeamColor and tostring(string.sub(tostring(GetClosestPlayer.TeamColor), 1, 1)) or ""
 								shared.TargetHealth.Text = tostring(math.round(GetClosestPlayer.Character.Humanoid.Health))
-								shared.TargetHealth.TextColor3 = GetClosestPlayer.Character.Humanoid.Health >= 90 and
-                                    Color3.fromRGB(34, 255, 0) or
-                                    GetClosestPlayer.Character.Humanoid.Health >= 50 and Color3.fromRGB(255, 125, 11) or
-                                    Color3.fromRGB(255, 5, 22)
-								game:GetService("TweenService"):Create(shared.SliderInner,
-                                    TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-                                    {
-									Size = UDim2.fromScale(
-                                            GetClosestPlayer.Character.Humanoid.Health / 
-                                            GetClosestPlayer.Character.Humanoid.MaxHealth,
-                                            1)
+								shared.TargetHealth.TextColor3 = GetClosestPlayer.Character.Humanoid.Health >= 90 and Color3.fromRGB(34, 255, 0) or GetclosestPlayer.Character.Humanoid.Health >= 50 and Color3.fromRGB(255, 125, 11) or Color3.fromRGB(255, 5, 22)
+								game:GetService("TweenService"):Create(shared.SliderInner, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+									Size = UDim2.fromScale(GetClosestPlayer.Character.Humanoid.Health / GetClosestPlayer.Character.Humanoid.MaxHealth, 1)
 								}):Play()
-								shared.SliderInner2.Size = UDim2.fromScale(
-                                    GetClosestPlayer.Character.Humanoid.Health / 
-                                    GetClosestPlayer.Character.Humanoid.MaxHealth,
-                                    1)
+								shared.SliderInner2.Size = UDim2.fromScale(GetClosestPlayer.Character.Humanoid.Health / GetClosestPlayer.Character.Humanoid.MaxHealth, 1)
 							end)
 						end
 					end
@@ -388,6 +364,8 @@ TargetHudModule:CreateSlider({
 		TargetHudRange = Callback
 	end
 })
+
+------Aimbot Module------
 local AimbotRange = 100
 local AimbotFOV = 90
 local AimbotWallCheck = false
@@ -466,6 +444,8 @@ AimBot:CreateSlider({
 		AimbotSpeed = Callback
 	end
 })
+
+------AutoClicker Module------
 local autoclickermousedown = false
 local AutoClickerCPS = 1
 local firstClick = tick() + 0.1
@@ -498,12 +478,10 @@ Autoclicker = Combat:CreateToggle({
 					end
 					if Autoclicker and AutoClickerBlocks and autoclickermousedown and bedwars["BlockPlacementController"].blockPlacer and firstClick <= tick() then
 						if (workspace:GetServerTimeNow() - bedwars["BlockCpsController"].lastPlaceTimestamp) > (1 / 24) then
-							local mouseinfo = bedwars["BlockPlacementController"].blockPlacer.clientManager
-                                :getBlockSelector():getMouseInfo(0)
+							local mouseinfo = bedwars["BlockPlacementController"].blockPlacer.clientManager:getBlockSelector():getMouseInfo(0)
 							if mouseinfo then
 								if mouseinfo.placementPosition == mouseinfo.placementPosition then
-									bedwars["BlockPlacementController"].blockPlacer:placeBlock(mouseinfo
-                                        .placementPosition)
+									bedwars["BlockPlacementController"].heterna:placeBlock(mouseinfo.placementPosition)
 								end
 							end
 						end
@@ -531,34 +509,7 @@ Autoclicker:CreateToggle({
 	end
 })
 
- --maybe this will make it hit farther? (update: this is stupid, it does not work) -> anyone claiming reach gives even a slight advantage (yes even vape) is lying. -> it "gives" better hits because the localscript registeres the attack further away but when the server checks the attack, its not going to matter since modulescripts are server-sided and the server checks the distance of the attack. -> so this is just stupid
---[[
-Reach = Combat:CreateToggle({
-	Name = "Reach",
-	Callback = function(Callback)
-		ReachEnabled = Callback
-		if ReachEnabled then
-			repeat
-				task.wait(2)
-				bedwars["CombatConstant"].RAYCAST_SWORD_CHARACTER_DISTANCE = 14.4
-				task.wait(0.1)
-				bedwars["CombatConstant"].RAYCAST_SWORD_CHARACTER_DISTANCE = ReachDistance
-			until not ReachEnabled
-		else
-			bedwars["CombatConstant"].RAYCAST_SWORD_CHARACTER_DISTANCE = 14.4
-		end
-	end
-})
-Reach:CreateInfo("Gives you long arms")
-Reach:CreateSlider({
-	Name = "Range",
-	Min = 0,
-	Default = 20,
-	Max = 20,
-	Callback = function(Callback)
-		ReachDistance = Callback
-	end
-})]]
+------AutoSprint Module------
 local oldSprintFunction
 Combat:CreateToggle({
 	Name = "AutoSprint",
@@ -572,7 +523,7 @@ Combat:CreateToggle({
 				return originalCall
 			end
 			LocalPlayer.CharacterAdded:Connect(function(char)
-				char:WaitForChild('Humanoid', 9e9)
+				char:WaitForChild("Humanoid", 9e9)
 				task.wait(0.5)
 				bedwars.SprintController:stopSprinting()
 			end)
@@ -585,6 +536,8 @@ Combat:CreateToggle({
 		end
 	end
 })
+
+------Velocity Module------
 local applyKnockback
 Velocity = Combat:CreateToggle({
 	Name = "Velocity",
@@ -622,6 +575,8 @@ Velocity:CreateSlider({
 		Verti = Callback
 	end
 })
+
+------AutoQueue Module------
 Blatant:CreateToggle({
 	Name = "AutoQueue",
 	Callback = function(Callback)
@@ -633,149 +588,219 @@ Blatant:CreateToggle({
 			if not AutoQueue then
 				return
 			end
-			game:GetService("ReplicatedStorage"):FindFirstChild(
-                "events-@easy-games/lobby:shared/event/lobby-events@getEvents.Events").joinQueue:FireServer({
-				["queueType"] =
-                    GetQueueType()
+			game:GetService("ReplicatedStorage"):FindFirstChild("events-@easy-games/lobby:shared/event/lobby-events@getEvents.Events").joinQueue:FireServer({
+				["queueType"] = GetQueueType()
 			})
 		end
 	end
 })
 
+------Utility Functions------
 local function getclosetestnearshop()
-	local newshopmag = 20
-	local shop = nil
-	for i, v in next, (collectionService:GetTagged('BedwarsItemShop')) do
-		local newshopmag2 = (v.Position - LocalPlayer.Character.HumanoidRootPart.Position).magnitude
-		if newshopmag2 < newshopmag then
-			newshopmag = newshopmag2
-			shop = v
-		end
-	end
-	return shop
+    local newshopmag = 20
+    local shop = nil
+    for i, v in next, (collectionService:GetTagged("BedwarsItemShop")) do
+        if not v or not v.Parent then continue end
+        local newshopmag2 = (v.Position - LocalPlayer.Character.HumanoidRootPart.Position).magnitude
+        if newshopmag2 < newshopmag then
+            newshopmag = newshopmag2
+            shop = v
+        end
+    end
+    return shop
 end
 
--- Item lists
 local armors = {
-	[1] = 'leather_chestplate',
-	[2] = 'iron_chestplate',
-	[3] = 'diamond_chestplate',
-	[4] = 'emerald_chestplate'
+    [1] = "leather_chestplate",
+    [2] = "iron_chestplate", 
+    [3] = "diamond_chestplate",
+    [4] = "emerald_chestplate"
 }
 
 local swords = {
-	[1] = 'wood_sword',
-	[2] = 'stone_sword',
-	[3] = 'iron_sword',
-	[4] = 'diamond_sword',
-	[5] = 'emerald_sword'
+    [1] = "wood_sword",
+    [2] = "stone_sword",
+    [3] = "iron_sword", 
+    [4] = "diamond_sword",
+    [5] = "emerald_sword"
 }
 
+-- Kit-specific sword modifications
 if RavenEquippedKit ~= nil then
-	if RavenEquippedKit == 'dasher' then
-		swords = {
-			[1] = 'wood_dao',
-			[2] = 'stone_dao',
-			[3] = 'iron_dao',
-			[4] = 'diamond_dao',
-			[5] = 'emerald_dao'
-		}
-	elseif RavenEquippedKit == 'ice_queen' then
-		swords[5] = 'ice_sword'
-	elseif RavenEquippedKit == 'ember' then
-		swords[5] = 'infernal_saber'
-	elseif RavenEquippedKit == 'lumen' then
-		swords[5] = 'light_sword'
-	end
+    if RavenEquippedKit == "dasher" then
+        swords = {
+            [1] = "wood_dao",
+            [2] = "stone_dao", 
+            [3] = "iron_dao",
+            [4] = "diamond_dao",
+            [5] = "emerald_dao"
+        }
+    elseif RavenEquippedKit == "ice_queen" then
+        swords[5] = "ice_sword"
+    elseif RavenEquippedKit == "ember" then
+        swords[5] = "infernal_saber"
+    elseif RavenEquippedKit == "lumen" then
+        swords[5] = "light_sword"
+    end
 end
 
 local function canBuyItem(itemName, shopId)
-	local item = getShopItem(itemName)
-	if not item then
-		return false
-	end
-	local currency = GetItemNear(item.currency)
-	return currency and item.price <= currency.amount, item, shopId
+    local item = getShopItem(itemName)
+    if not item then
+        return false
+    end
+    local currency = GetItemNear(item.currency)
+    return currency and item.price <= currency.amount, item, shopId
 end
 
+local function hasItem(itemName)
+    return GetItemNear(itemName) ~= nil
+end
+
+local function getCurrentArmorTier()
+    for i = 4, 1, -1 do
+        if hasItem(armors[i]) then
+            return i
+        end
+    end
+    return 0
+end
+
+local function getCurrentSwordTier()
+    local currentSword = getSword()
+    if not currentSword then return 0 end
+    
+    local currentSwordName = currentSword.tool.name
+    for i = 5, 1, -1 do
+        if currentSwordName == swords[i] then
+            return i
+        end
+    end
+    return 0
+end
+
+local autoBuyCoroutine = nil
+
+------AutoBuy Module------
 AutoBuy = Blatant:CreateToggle({
-	Name = "Auto Buy",
-	Callback = function(Callback)
-		EnabledAutoBuy = Callback
-		if EnabledAutoBuy then
-			spawn(function()
-				while EnabledAutoBuy and task.wait() do
-					if not IsAlive(LocalPlayer) then
-						continue
-					end
-					local shop = getclosetestnearshop()
-					if not shop then
-						continue
-					end
-
-					if EnabledSwordsBuy then
-						local currentSword = getSword()
-						local currentSwordName = currentSword and currentSword.tool.name
-						for i = 5, 1, -1 do
-							if currentSwordName ~= swords[i] then
-								local canBuy, item, shopId = canBuyItem(swords[i], shop.Name)
-								if canBuy then
-									buyremote(item.itemType, shopId)
-									break
-								end
-							end
-						end
-					end
-
-					if EnabledArmorBuy then
-						local hasArmor = false
-						for i = 1, 4 do
-							if GetItemNear(armors[i]) then
-								hasArmor = true
-								local canBuy, item, shopId = canBuyItem(armors[i + 1], shop.Name)
-								if canBuy and i < 4 then
-									buyremote(item.itemType, shopId)
-									break
-								end
-							end
-						end
-						if not hasArmor then
-							local canBuy, item, shopId = canBuyItem(armors[1], shop.Name)
-							if canBuy then
-								buyremote(item.itemType, shopId)
-							end
-						end
-					end
-				end
-			end)
-		end
-	end
+    Name = "Auto Buy",
+    Callback = function(Callback)
+        EnabledAutoBuy = Callback
+        
+        if autoBuyCoroutine then
+            coroutine.close(autoBuyCoroutine)
+            autoBuyCoroutine = nil
+        end
+        
+        if EnabledAutoBuy then
+            autoBuyCoroutine = coroutine.create(function()
+                while EnabledAutoBuy do
+                    local success, err = pcall(function()
+                        if not IsAlive(LocalPlayer) then
+                            return
+                        end
+                        
+                        local shop = getclosetestnearshop()
+                        if not shop then
+                            return
+                        end
+                        
+                        local purchaseMade = false
+                        
+                        -- Handle sword purchases
+                        if EnabledSwordsBuy then
+                            local currentTier = getCurrentSwordTier()
+                            
+                            -- Try to buy the best available sword (starting from tier 5)
+                            for tier = 5, currentTier + 1, -1 do
+                                if swords[tier] then
+                                    local canBuy, item, shopId = canBuyItem(swords[tier], shop.Name)
+                                    if canBuy then
+                                        buyremote(item.itemType, shopId)
+                                        purchaseMade = true
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                        
+                        -- Handle armor purchases (only if no sword was purchased)
+                        if EnabledArmorBuy and not purchaseMade then
+                            local currentTier = getCurrentArmorTier()
+                            
+                            if currentTier == 0 then
+                                -- No armor, try to buy leather
+                                local canBuy, item, shopId = canBuyItem(armors[1], shop.Name)
+                                if canBuy then
+                                    buyremote(item.itemType, shopId)
+                                    purchaseMade = true
+                                end
+                            elseif currentTier < 4 then
+                                -- Try to upgrade to next tier
+                                local canBuy, item, shopId = canBuyItem(armors[currentTier + 1], shop.Name)
+                                if canBuy then
+                                    buyremote(item.itemType, shopId)
+                                    purchaseMade = true
+                                end
+                            end
+                        end
+                        
+                        -- Add extra delay if purchase was made
+                        if purchaseMade then
+                            task.wait(0.5)
+                        end
+                    end)
+                    
+                    if not success and err then
+                        warn("AutoBuy error:", err)
+                    end
+                    
+                    -- Main loop delay - much more reasonable
+                    task.wait(0.2)
+                end
+            end)
+            
+            coroutine.resume(autoBuyCoroutine)
+        end
+    end
 })
+
 AutoBuy:CreateInfo("Automatically buys stuff for you!")
+
 AutoBuy:CreateToggle({
-	Name = "Buy Armor",
-	StartingState = true,
-	Callback = function(Callback)
-		EnabledArmorBuy = Callback
-	end
+    Name = "Buy Armor",
+    StartingState = true,
+    Callback = function(Callback)
+        EnabledArmorBuy = Callback
+    end
 })
+
 AutoBuy:CreateToggle({
-	Name = "Buy Swords",
-	StartingState = true,
-	Callback = function(Callback)
-		EnabledSwordsBuy = Callback
-	end
+    Name = "Buy Swords", 
+    StartingState = true,
+    Callback = function(Callback)
+        EnabledSwordsBuy = Callback
+    end
 })
+
+------Fly Module------
 local flyEnabled = false
 local secondstimer = "2.5s"
 local firsttime = tick() + 2.5
+local flydown = false
+local flyup = false
+local EnabledFly = false
+local EnabledFlyButton = false
+local FlyButtonEnabled = false
+local flyactived = false
+local FlyDown = false
+local FlyUp = false
 
 spawn(function()
 	repeat
 		task.wait()
 		if IsAlive(LocalPlayer) then
-			local onground = getPlacedBlock(LocalPlayer.character.HumanoidRootPart.Position +
-                Vector3.new(0, (LocalPlayer.character.Humanoid.HipHeight * -2) - 1, 0))
+			local onground = getPlacedBlock(LocalPlayer.character.HumanoidRootPart.Position + Vector3.new(0, (LocalPlayer.character.Humanoid.HipHeight * -2) - 1, 0))
 			if onground then
 				firsttime = tick() + 2.5
 				flyEnabled = true
@@ -792,14 +817,7 @@ spawn(function()
 		end
 	until not loop
 end)
-flydown = false
-flyup = false
-EnabledFly = false
-EnabledFlyButton = false
-FlyButtonEnabled = false
-flyactived = false
-FlyDown = false
-FlyUp = false
+
 function flyfunc()
 	if (EnabledFly or (FlyButtonEnabled and EnabledFlyButton)) and IsAlive(LocalPlayer) and not flyactived then
 		flyactived = true
@@ -818,7 +836,7 @@ function flyfunc()
 					flydown = true
 				end
 			end)
-			inputEndedConnection = UIS.InputEnded:Connect(function(input, gameProcessed)
+			inputEndedConnection = UIS.InputEnded:Connect( function(input, gameProcessed)
 				if gameProcessed then
 					return
 				end
@@ -847,28 +865,18 @@ function flyfunc()
 							Flytppos = root.Position.Y
 							velo.Velocity = Vector3.new(0, -10, 0)
 							task.wait(0.12)
-							root.CFrame = CFrame.new(root.CFrame.Position.X,
-								ray.Position.Y + (root.Size.Y / 2) + character.Humanoid.HipHeight,
-								root.CFrame.Position.Z) * root.CFrame.Rotation
+							root.CFrame = CFrame.new(root.CFrame.Position.X, ray.Position.Y + (root.Size.Y / 2) + character.Humanoid.HipHeight, root.CFrame.Position.Z) * root.CFrame.Rotation
 							task.wait(0.12)
 							if not (EnabledFly or (FlyButtonEnabled and EnabledFlyButton) and IsAlive(LocalPlayer)) then
 								break
 							end
 							if Flytppos ~= -99999 and IsAlive(LocalPlayer) then
-								root.CFrame = CFrame.new(root.CFrame.Position.X, Flytppos, root.CFrame.Position.Z) *
-									root.CFrame.Rotation
+								root.CFrame = CFrame.new(root.CFrame.Position.X, Flytppos, root.CFrame.Position.Z) * root.CFrame.Rotation
 							end
 						end
 					end
-					local positioncheck = (flyup or FlyUp) and Vector3.new(0, (root.Size.Y / 2) + character.Humanoid.HipHeight - 0.5, 0) or
-						(flydown or FlyDown) and Vector3.new(0, ((root.Size.Y / 2) + character.Humanoid.HipHeight - 0.5) * -1, 0) or
-						Vector3.new(0, 0, 0)
-					local blockResult = workspace:Blockcast(
-						CFrame.new(character.HumanoidRootPart.Position),
-						Vector3.new(3, 3, 3),
-						positioncheck,
-						blockRaycast
-					)
+					local positioncheck = (flyup or FlyUp) and Vector3.new(0, (root.Size.Y / 2) + character.Humanoid.HipHeight - 0.5, 0) or (flydown or FlyDown) and Vector3.new(0, ((root.Size.Y / 2) + character.Humanoid.HipHeight - 0.5) * -1, 0) or Vector3.new(0, 0, 0)
+					local blockResult = workspace:Blockcast(CFrame.new(character.HumanoidRootPart.Position), Vector3.new(3, 3, 3), positioncheck, blockRaycast)
 					if not blockResult then
 						velo.Velocity = Vector3.new(0, ((flyup or FlyUp) and UpValue or 0) + ((flydown or FlyDown) and -DownValue or 0), 0)
 					else
@@ -900,7 +908,6 @@ Fly = Blatant:CreateToggle({
 		if EnabledFly then
 			flyfunc()
 		else
-
 			flyactived = false
 			FlyCounter.Visible = false
 			if LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyVelocity") then
@@ -997,7 +1004,6 @@ FlyButton.MouseButton1Click:Connect(function()
 				end
 			end)
 			flyfunc()
-			-- Cleanup when FlyButton is toggled off
 			FlyButton:GetPropertyChangedSignal("Visible"):Connect(function()
 				if not FlyButton.Visible then
 					if upButtonConnectionEnter then
@@ -1023,97 +1029,14 @@ FlyButton.MouseButton1Click:Connect(function()
 		end)
 	end
 end)
---[[
-local function ShootProjectile(Item, Projectile, NearestPOS)
-	local Args = {
-		[1] = Item,
-		[2] = Projectile,
-		[3] = Projectile,
-		[4] = NearestPOS,
-		[5] = NearestPOS,
-		[6] = Vector3.new(0, -25, 0),
-		[7] = HttpService:GenerateGUID(true),
-		[8] = {
-			["drawDurationSeconds"] = 0.96,
-			["shotId"] = HttpService:GenerateGUID(false)
-		},
-		[9] = (game.Workspace:GetServerTimeNow() - 0.11)
-	}
-	game:GetService("ReplicatedStorage").rbxts_include.node_modules:WaitForChild("@rbxts"):WaitForChild("net")
-        :WaitForChild("out")._NetManaged.ProjectileFire:InvokeServer(unpack(Args))
-end
-local BowAuraRange = 500
-local FireBallProjectile = false
-local InfiniteRange = true
-BowAura = Blatant:CreateToggle({
-	Name = "BowAura", --broken
-	Callback = function(Callback)
-		EnabledBowAura = Callback
-		if EnabledBowAura then
-			repeat
-				task.wait(0.1)
-				local NearestPlayer = InfiniteRange and GetClosestTeamCheck(math.huge) or
-                    GetClosestTeamCheck(BowAuraRange)
-				local NearestPlayerCheck = GetClosestTeamCheck(KillauraRange)
-				local Monster = ClosestEntity(KillauraRange)
-				if IsAlive(LocalPlayer) and IsAlive(NearestPlayer) and NearestPlayer ~= nil and NearestPlayer.Character.Humanoid.Health > 0 and not NearestPlayer.Character:FindFirstChildOfClass("ForceField") and GetMatchState() ~= 0 then
-					if NearestPlayerCheck == nil and Monster == nil then
-						local bow = GetItemNear("crossbow") or GetItemNear("bow") or nil
-						local arrow = GetItemNear("arrow")
-						if bow ~= nil and arrow ~= nil then
-							switchItem(bow.tool)
-							ShootProjectile(bow.tool, arrow.tool.Name, NearestPlayer.Character.HumanoidRootPart.Position)
-						end
-					end
-					if OtherBowAura then
-						local Projectiles = GetItemNear("snowball") or (FireBallProjectile and GetItemNear("fireball")) or
-                            nil
-						if Projectiles ~= nil then
-							ShootProjectile(Projectiles.tool, Projectiles.tool.Name,
-                                NearestPlayer.Character.HumanoidRootPart.Position)
-						end
-					end
-				end
-			until not EnabledBowAura
-		end
-	end
-})
-BowAura:CreateInfo("Killaura but for Projectiles")
-BowAura:CreateSlider({
-	Name = "Range",
-	Default = 500,
-	Min = 50,
-	Max = 1500,
-	Callback = function(Callback)
-		BowAuraRange = Callback
-	end
-})
-BowAura:CreateToggle({
-	Name = "Inf Range",
-	StartingState = true,
-	Callback = function(Callback)
-		InfiniteRange = Callback
-	end
-})
-BowAura:CreateToggle({
-	Name = "Other Projectiles",
-	StartingState = true,
-	Callback = function(Callback)
-		OtherBowAura = Callback
-	end
-})
-BowAura:CreateToggle({
-	Name = "Fireballs",
-	Callback = function(Callback)
-		FireBallProjectile = Callback
-	end
-})]]
+
+------HighJump Module------
 HighJump = Blatant:CreateToggle({
 	Name = "HighJump",
 	Callback = function(Callback)
 		HighJump = Callback
 		if HighJump then
-			JumpingConnect = LocalPlayer.Character.Humanoid.Jumping:Connect(function(IsJumping) --Best way to do this
+			JumpingConnect = LocalPlayer.Character.Humanoid.Jumping:Connect(function(IsJumping)
 				if IsJumping then
 					if IsAlive(LocalPlayer) then
 						workspace.Gravity = 192.6
@@ -1140,6 +1063,8 @@ HighJump:CreateSlider({
 		JumpHeight = Callback
 	end
 })
+
+------InfJump Module------
 local CheckInfJump = false
 Blatant:CreateToggle({
 	Name = "INF Jump",
@@ -1148,7 +1073,7 @@ Blatant:CreateToggle({
 		if EnabledINFJUMP then
 			CheckInfJump = true
 			ConnectionINFJUMP = game:GetService("UserInputService").JumpRequest:Connect(function()
-				game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
+				game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
 			end)
 		else
 			if CheckInfJump then
@@ -1157,6 +1082,8 @@ Blatant:CreateToggle({
 		end
 	end
 })
+
+------LongJump Module------
 local LongJumpItem = false
 LongJumpModule = Blatant:CreateToggle({
 	Name = "LongJump",
@@ -1174,7 +1101,6 @@ LongJumpModule = Blatant:CreateToggle({
 				return
 			end
 			if not workspace:Raycast(root.Position, Vector3.new(0, -3, 0), blockRaycast) then 
-				--shared:createnotification("Need to be on the ground for longjump", 0.5, "Longjump failed", 0.2)
 				LongJumpModule:SetState(false)
 				LongJumpItem = false
 				return
@@ -1190,9 +1116,7 @@ LongJumpModule = Blatant:CreateToggle({
 			local HRootPos = root.Position
 			local Pos2 = HRootPos + Vector3.new(0, 2, 0)
 			if GetItemNear("tnt") then
-				game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@easy-games")
-					:FindFirstChild("block-engine").node_modules:FindFirstChild("@rbxts").net.out._NetManaged.PlaceBlock
-					:InvokeServer({
+				game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@easy-games"):FindFirstChild("block-engine").node_modules:FindFirstChild("@rbxts").net.out._NetManaged.PlaceBlock:InvokeServer({
 					["blockType"] = "tnt",
 					["blockData"] = 0,
 					["position"] = getserverpos(HRootPos)
@@ -1201,22 +1125,18 @@ LongJumpModule = Blatant:CreateToggle({
 			end
 			if GetItemNear("fireball") then
 				local inv = LocalPlayer.Character.InventoryFolder.Value
-				game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out
-					._NetManaged.SetInvItem:InvokeServer({
+				game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.SetInvItem:InvokeServer({
 					["hand"] = inv["fireball"]
 				})
-				game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out
-					._NetManaged.ProjectileFire:InvokeServer(
+				game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.ProjectileFire:InvokeServer(
 					inv["fireball"], "fireball", "fireball", Pos2, HRootPos, Vector3.new(0, -60, 0),
 					game:GetService("HttpService"):GenerateGUID(true), {
 					drawDurationSeconds = 1
-				},
-					workspace:GetServerTimeNow() - 0.045
+				}, workspace:GetServerTimeNow() - 0.045
 				)
 				LongJumpItem = true
 			end
 			if LongJumpItem == false then 
-				--shared:createnotification("No Item found", 0.5, "Longjump failed", 0.2)
 				LongJumpModule:SetState(false)
 				return
 			end
@@ -1234,9 +1154,7 @@ LongJumpModule = Blatant:CreateToggle({
 					local rayOrigin = root.Position
 					local rayDirection = Direction * 5
 					local raycastParams = RaycastParams.new()
-					raycastParams.FilterDescendantsInstances = {
-						LocalPlayer.Character
-					}
+					raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
 					raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 					local raycastResult = workspace:Raycast(rayOrigin, rayDirection, raycastParams)
 					if raycastResult then
@@ -1266,6 +1184,8 @@ LongJumpModule = Blatant:CreateToggle({
 		end
 	end
 })
+
+------NoFall Module------
 local NoFallEnabled = false
 local FallMode = "FakeSend"
 local firstfallpos = 0
@@ -1288,17 +1208,11 @@ Nofall = Blatant:CreateToggle({
 				end
 
 				local SAFE_FALL_VELOCITY = -77.5
-
 				local raycastParams = RaycastParams.new()
-				raycastParams.FilterDescendantsInstances = {
-					character
-				}
+				raycastParams.FilterDescendantsInstances = {character}
 				raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-
 				local blockRaycast = RaycastParams.new()
-				blockRaycast.FilterDescendantsInstances = {
-					character
-				}
+				blockRaycast.FilterDescendantsInstances = {character}
 				blockRaycast.FilterType = Enum.RaycastFilterType.Exclude
 
 				local steppedConnection
@@ -1320,7 +1234,7 @@ Nofall = Blatant:CreateToggle({
 							if not waitforflydown then
 								waitforflydown = true
 								firstfallpos = root.Position.Y
-								firsttime = tick() -- Initialize firsttime
+								firsttime = tick()
 							end
 						else
 							waitforflydown = false
@@ -1356,14 +1270,11 @@ Nofall = Blatant:CreateToggle({
 						characterAddedConnection:Disconnect()
 						return
 					end
+
 					root = newCharacter:WaitForChild("HumanoidRootPart", 5)
 					humanoid = newCharacter:WaitForChild("Humanoid", 5)
-					raycastParams.FilterDescendantsInstances = {
-						newCharacter
-					}
-					blockRaycast.FilterDescendantsInstances = {
-						newCharacter
-					}
+					raycastParams.FilterDescendantsInstances = {newCharacter}
+					blockRaycast.FilterDescendantsInstances = {newCharacter}
 				end)
 
 				Nofall.Connections = Nofall.Connections or {}
@@ -1378,11 +1289,7 @@ Nofall = Blatant:CreateToggle({
 								pcall(function()
 									local netManaged = ReplicatedStorage:FindFirstChild("rbxts_include", true):FindFirstChild("node_modules", true):FindFirstChild("@rbxts", true):FindFirstChild("net", true):FindFirstChild("out", true):FindFirstChild("_NetManaged", true)
 									if netManaged then
-										netManaged:FindFirstChild("GroundHit"):FireServer(
-                                            nil,
-                                            Vector3.new(0, root.AssemblyLinearVelocity.Y, 0),
-                                            workspace:GetServerTimeNow()
-                                        )
+										netManaged:FindFirstChild("GroundHit"):FireServer(nil, Vector3.new(0, root.AssemblyLinearVelocity.Y, 0), workspace:GetServerTimeNow())
 									end
 									local ray = workspace:Raycast(root.Position, Vector3.new(0, root.AssemblyLinearVelocity.Y * 0.1, 0), blockRaycast)
 									if ray then
@@ -1411,17 +1318,22 @@ Nofall:CreateDropDown({
 	Name = "Mode",
 	DefaultOption = "FakeSend",
 	SecondArrayitem = true,
-	Options = {
-		--"TimerTP",
-		"FakeSend"
-	},
+	Options = {"FakeSend"},
 	Callback = function(Callback)
 		FallMode = Callback
 	end
 })
+
+------Speed Module------
 local RavenzephyrOrb = 0
 local DmgBoostTick = tick()
 local DamageBoostEnabled = true
+local PotionBoostEnabled = false
+local NewSpeed = 23
+local EnabledSpeed = false
+local Jumpoptions = "Lowhop"
+local raycastparameters = RaycastParams.new()
+
 if game.PlaceId ~= 6872265039 then
 	local oldZephyrUpdate = bedwars["ZephyrController"].updateJump
 	bedwars["ZephyrController"].updateJump = function(self, orb, ...)
@@ -1429,6 +1341,7 @@ if game.PlaceId ~= 6872265039 then
 		return oldZephyrUpdate(self, orb, ...)
 	end
 end
+
 task.spawn(function()
 	bedwars["ClientHandler"]:WaitFor("EntityDamageEvent"):andThen(function(v)
 		v:Connect(function(plr)
@@ -1440,12 +1353,6 @@ task.spawn(function()
 		end)
 	end)
 end)
-
-local PotionBoostEnabled = false
-local NewSpeed = 23 
-local EnabledSpeed = false
-local Jumpoptions = "Lowhop"
-local raycastparameters = RaycastParams.new()
 
 local function GetSpeed()
 	local speed = 0
@@ -1467,9 +1374,8 @@ local function GetSpeed()
 	end
 	return speed - 1.5
 end
+
 local loop = LoopManager.new()
-
-
 Speed = Blatant:CreateToggle({
 	Name = "Speed",
 	Callback = function(Callback)
@@ -1482,10 +1388,7 @@ Speed = Blatant:CreateToggle({
 					local speedVector = moveDirection * ((FixedSpeed) - 20) * deltatime
 					local root = LocalPlayer.Character.HumanoidRootPart
 					local rayCheck = RaycastParams.new()
-					rayCheck.FilterDescendantsInstances = {
-						LocalPlayer.Character,
-						workspace.CurrentCamera
-					}
+					rayCheck.FilterDescendantsInstances = {LocalPlayer.Character, workspace.CurrentCamera}
 					rayCheck.CollisionGroup = root.CollisionGroup
 					local ray = workspace:Raycast(root.Position, speedVector, rayCheck)
 
@@ -1494,8 +1397,9 @@ Speed = Blatant:CreateToggle({
 						root.Velocity = (moveDirection * FixedSpeed) + Vector3.new(0, root.Velocity.Y, 0)
 					end
 
-					
-					if LocalPlayer.Character.Humanoid.FloorMaterial ~= Enum.Material.Air and moveDirection ~= Vector3.zero and Jumpoptions ~= "" then
+					if LocalPlayer.Character.Humanoid.FloorMaterial ~= Enum
+
+.Material.Air and moveDirection ~= Vector3.zero and Jumpoptions ~= "" then
 						if Jumpoptions == "Normal" then
 						elseif Jumpoptions == "AutoJump" then
 							LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
@@ -1512,17 +1416,12 @@ Speed = Blatant:CreateToggle({
 	end
 })
 
-
 Speed:CreateInfo("Makes you go zoooom")
 Speed:CreateDropDown({
 	Name = "Mode",
 	DefaultOption = "Lowhop",
 	SecondArrayitem = true,
-	Options = {
-		"Normal",
-		"AutoJump",
-		"Lowhop",
-	},
+	Options = {"Normal", "AutoJump", "Lowhop"},
 	Callback = function(Callback)
 		Jumpoptions = Callback
 	end
@@ -1543,11 +1442,13 @@ Speed:CreateToggle({
 		PotionBoostEnabled = Callback
 	end
 })
--- Spider Module
+
+------Spider Module------
 local SpiderEnabled = false
 local SpiderActive = false
 local SpiderSpeed = 50
 local loop = LoopManager.new()
+
 Spider = Blatant:CreateToggle({
 	Name = "Spider",
 	Callback = function(Callback)
@@ -1559,10 +1460,8 @@ Spider = Blatant:CreateToggle({
 					return
 				end
 				local vec = LocalPlayer.Character.Humanoid.MoveDirection * 2
-				local newray = getPlacedBlock(LocalPlayer.Character.HumanoidRootPart.Position +
-                    (vec + Vector3.new(0, 0.1, 0)))
-				local newray2 = getPlacedBlock(LocalPlayer.Character.HumanoidRootPart.Position +
-                    (vec - Vector3.new(0, LocalPlayer.Character.Humanoid.HipHeight, 0)))
+				local newray = getPlacedBlock(LocalPlayer.Character.HumanoidRootPart.Position + (vec + Vector3.new(0, 0.1, 0)))
+				local newray2 = getPlacedBlock(LocalPlayer.Character.HumanoidRootPart.Position + (vec - Vector3.new(0, LocalPlayer.Character.Humanoid.HipHeight, 0)))
 				if newray and (not newray.CanCollide) then
 					newray = nil
 				end
@@ -1570,16 +1469,11 @@ Spider = Blatant:CreateToggle({
 					newray2 = nil
 				end
 				if SpiderActive and (not newray) and (not newray2) then
-					LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(
-                        LocalPlayer.Character.HumanoidRootPart.Velocity.X, 0,
-                        LocalPlayer.Character.HumanoidRootPart.Velocity.Z)
+					LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(LocalPlayer.Character.HumanoidRootPart.Velocity.X, 0, LocalPlayer.Character.HumanoidRootPart.Velocity.Z)
 				end
 				SpiderActive = ((newray or newray2) and true or false)
 				if (newray or newray2) then
-					LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(
-                        newray2 and newray == nil and LocalPlayer.Character.HumanoidRootPart.Velocity.X or 0,
-                        SpiderSpeed or 50,
-                        newray2 and newray == nil and LocalPlayer.Character.HumanoidRootPart.Velocity.Z or 0)
+					LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(newray2 and newray == nil and LocalPlayer.Character.HumanoidRootPart.Velocity.X or 0, SpiderSpeed or 50, newray2 and newray == nil and LocalPlayer.Character.HumanoidRootPart.Velocity.Z or 0)
 				end
 			end)
 		else
@@ -1599,6 +1493,8 @@ Spider:CreateSlider({
 		SpiderSpeed = Callback
 	end
 })
+
+------Render Modules------
 local Sky
 Render:CreateToggle({
 	Name = "Galaxy Sky",
@@ -1621,11 +1517,11 @@ Render:CreateToggle({
 		end
 	end
 })
+
 local Atmosphere
 Render:CreateToggle({
 	Name = "Atmosphere",
 	Callback = function(Callback)
-		AtmoEnabled = Callback
 		AtmoEnabled = Callback
 		if AtmoEnabled then
 			Atmosphere = Instance.new("ColorCorrectionEffect")
@@ -1638,6 +1534,7 @@ Render:CreateToggle({
 		end
 	end
 })
+
 local oldfov
 local oldfov2
 FOV = Render:CreateToggle({
@@ -1674,6 +1571,7 @@ FOV:CreateSlider({
 		FOVValue = Callback
 	end
 })
+
 local ViewModelChangerEnabled = false
 ViewModelChanger = Render:CreateToggle({
 	Name = "ViewModelChanger",
@@ -1682,22 +1580,14 @@ ViewModelChanger = Render:CreateToggle({
 		local viewmodel = Camera:FindFirstChild("Viewmodel")
 		if viewmodel and ViewModelChangerEnabled == true then
 			print("Viewmodel offset")
-			bedwars.ViewmodelController:setHeldItem(LocalPlayer.Character and
-                LocalPlayer.Character:FindFirstChild("HandInvItem") and LocalPlayer.Character.HandInvItem.Value and
-                LocalPlayer.Character.HandInvItem.Value:Clone())
-			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute(
-                "ConstantManager_DEPTH_OFFSET", -(8 / 10))
-			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute(
-                "ConstantManager_HORIZONTAL_OFFSET", (8 / 10))
-			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute(
-                "ConstantManager_VERTICAL_OFFSET", (0 / 10))
+			bedwars.ViewmodelController:setHeldItem(LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HandInvItem") and LocalPlayer.Character.HandInvItem.Value and LocalPlayer.Character.HandInvItem.Value:Clone())
+			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(8 / 10))
+			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (8 / 10))
+			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_VERTICAL_OFFSET", (0 / 10))
 		else
-			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute(
-                "ConstantManager_DEPTH_OFFSET", 0)
-			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute(
-                "ConstantManager_HORIZONTAL_OFFSET", 0)
-			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute(
-                "ConstantManager_VERTICAL_OFFSET", 0)
+			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", 0)
+			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", 0)
+			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_VERTICAL_OFFSET", 0)
 		end
 	end
 })
@@ -1709,8 +1599,7 @@ ViewModelChanger:CreateSlider({
 	Max = 50,
 	Callback = function(Callback)
 		if ViewModelChangerEnabled then
-			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute(
-                "ConstantManager_DEPTH_OFFSET", -(Callback / 10))
+			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_DEPTH_OFFSET", -(Callback / 10))
 		end
 	end
 })
@@ -1721,8 +1610,7 @@ ViewModelChanger:CreateSlider({
 	Max = 50,
 	Callback = function(Callback)
 		if ViewModelChangerEnabled then
-			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute(
-                "ConstantManager_HORIZONTAL_OFFSET", (Callback / 10))
+			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_HORIZONTAL_OFFSET", (Callback / 10))
 		end
 	end
 })
@@ -1733,11 +1621,11 @@ ViewModelChanger:CreateSlider({
 	Max = 50,
 	Callback = function(Callback)
 		if ViewModelChangerEnabled then
-			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute(
-                "ConstantManager_VERTICAL_OFFSET", (Callback / 10))
+			LocalPlayer.PlayerScripts.TS.controllers.global.viewmodel["viewmodel-controller"]:SetAttribute("ConstantManager_VERTICAL_OFFSET", (Callback / 10))
 		end
 	end
 })
+
 local round = function(...)
 	local a = {}
 	for i, v in next, table.pack(...) do
@@ -1745,6 +1633,7 @@ local round = function(...)
 	end
 	return unpack(a)
 end
+
 local wtvp = function(...)
 	local a, b = Camera.WorldToViewportPoint(Camera, ...)
 	return Vector2.new(a.X, a.Y), b, a.Z
@@ -1789,16 +1678,19 @@ local function updateEsp(plr, esp)
 		esp.box.Visible = false
 	end
 end
+
 Players.PlayerAdded:Connect(function(player)
 	if EnabledESP then
 		createEsp(player)
 	end
 end)
+
 Players.PlayerRemoving:Connect(function(player)
 	if EnabledESP then
 		removeEsp(player)
 	end
 end)
+
 ESP = Render:CreateToggle({
 	Name = "ESP",
 	Callback = function(Callback)
@@ -1834,6 +1726,7 @@ ESP:CreateToggle({
 		ESPTeamCheck = Callback
 	end
 })
+
 Render:CreateToggle({
 	Name = "FPS Unlocker",
 	Callback = function(Callback)
@@ -1843,6 +1736,7 @@ Render:CreateToggle({
 		end
 	end
 })
+
 local old2
 local old
 basetextures = {}
@@ -1851,22 +1745,23 @@ local function fpsboosttextures()
 		repeat
 			task.wait()
 		until GetMatchState() ~= 0
-		for i, v in next, (collectionService:GetTagged('block')) do
-			if v:GetAttribute('PlacedByUserId') == 0 then
+		for i, v in next, (collectionService:GetTagged("block")) do
+			if v:GetAttribute("PlacedByUserId") == 0 then
 				v.Material = FPSBoostEnabled and FPSBoostTextureEnabled and Enum.Material.SmoothPlastic
 				basetextures[v] = basetextures[v] or v.MaterialVariant
-				v.MaterialVariant = FPSBoostEnabled and FPSBoostTextureEnabled and '' or basetextures[v]
+				v.MaterialVariant = FPSBoostEnabled and FPSBoostTextureEnabled and "" or basetextures[v]
 				for i2, v2 in next, (v:GetChildren()) do
 					pcall(function()
 						v2.Material = FPSBoostEnabled and FPSBoostTextureEnabled and Enum.Material.SmoothPlastic
 						basetextures[v2] = basetextures[v2] or v2.MaterialVariant
-						v2.MaterialVariant = FPSBoostEnabled and FPSBoostTextureEnabled and '' or basetextures[v2]
+						v2.MaterialVariant = FPSBoostEnabled and FPSBoostTextureEnabled and "" or basetextures[v2]
 					end)
 				end
 			end
 		end
 	end)
 end
+
 FPSBoost = Render:CreateToggle({
 	Name = "FPS Boost",
 	Callback = function(Callback)
@@ -1881,8 +1776,7 @@ FPSBoost = Render:CreateToggle({
 							onKill = function()
 							end,
 							isPlayDefaultKillEffect = function()
-								return
-                                    char == LocalPlayer.Character
+								return char == LocalPlayer.Character
 							end
 						}
 					end
@@ -1915,6 +1809,7 @@ FPSBoost:CreateToggle({
 		FPSBoostTextureEnabled = Callback
 	end
 })
+
 local Messages = {
 	"RavenB4",
 	"AC?",
@@ -1924,15 +1819,14 @@ local Messages = {
 	"Inf Dmg",
 	"Hide in my sock"
 }
+
 local old69
 Render:CreateToggle({
 	Name = "Raven Dmg Indicator",
 	Callback = function(Callback)
 		EnabledIndicator = Callback
 		if EnabledIndicator then
-			debug.getupvalue(bedwars["DamageIndicator"], 10, {
-				Create = old69
-			})
+			debug.getupvalue(bedwars["DamageIndicator"], 10, {Create = old69})
 			debug.setupvalue(bedwars["DamageIndicator"], 10, {
 				Create = function(self, obj, ...)
 					spawn(function()
@@ -1945,35 +1839,33 @@ Render:CreateToggle({
 				end
 			})
 		else
-			debug.setupvalue(bedwars["DamageIndicator"], 10, {
-				Create = old69
-			})
+			debug.setupvalue(bedwars["DamageIndicator"], 10, {Create = old69})
 			old69 = nil
 		end
 	end
 })
+
 Render:CreateToggle({
 	Name = "Custom Sounds",
 	Callback = function(Callback)
 		CustomSounds = Callback
 		if CustomSounds then
-			local oldbedwarssoundtable = { --never doing this again, took me a whole fucking day just getting this shit with a shitty mobile executor
-                -- getting them manually is crazy, anyways, took me 10 minutes to get all of the assets since bedwars keeps it in one script :)
-				['QUEUE_JOIN'] = 'rbxassetid://6691735519',
-				['QUEUE_MATCH_FOUND'] = 'rbxassetid://6768247187',
-				['UI_CLICK'] = 'rbxassetid://6732690176',
-				['UI_OPEN'] = 'rbxassetid://6732607930',
-				['BEDWARS_UPGRADE_SUCCESS'] = 'rbxassetid://6760677364',
-				['BEDWARS_PURCHASE_ITEM'] = 'rbxassetid://6760677364',
-				['SWORD_SWING_1'] = 'rbxassetid://6760544639',
-				['SWORD_SWING_2'] = 'rbxassetid://6760544595',
-				['DAMAGE_1'] = 'rbxassetid://6765457325',
-				['DAMAGE_2'] = 'rbxassetid://6765470975',
-				['DAMAGE_3'] = 'rbxassetid://6765470941',
-				['PICKUP_ITEM_DROP'] = 'rbxassetid://6768578304',
-				['ARROW_HIT'] = 'rbxassetid://6866062188',
-				['ARROW_IMPACT'] = 'rbxassetid://6866062148',
-				['KILL'] = 'rbxassetid://7013482008',
+			local oldbedwarssoundtable = {
+				["QUEUE_JOIN"] = "rbxassetid://6691735519",
+				["QUEUE_MATCH_FOUND"] = "rbxassetid://6768247187",
+				["UI_CLICK"] = "rbxassetid://6732690176",
+				["UI_OPEN"] = "rbxassetid://6732607930",
+				["BEDWARS_UPGRADE_SUCCESS"] = "rbxassetid://6760677364",
+				["BEDWARS_PURCHASE_ITEM"] = "rbxassetid://6760677364",
+				["SWORD_SWING_1"] = "rbxassetid://6760544639",
+				["SWORD_SWING_2"] = "rbxassetid://6760544595",
+				["DAMAGE_1"] = "rbxassetid://6765457325",
+				["DAMAGE_2"] = "rbxassetid://6765470975",
+				["DAMAGE_3"] = "rbxassetid://6765470941",
+				["PICKUP_ITEM_DROP"] = "rbxassetid://6768578304",
+				["ARROW_HIT"] = "rbxassetid://6866062188",
+				["ARROW_IMPACT"] = "rbxassetid://6866062148",
+				["KILL"] = "rbxassetid://7013482008",
 			}
 			for i, v in next, (bedwars["CombatController"].killSounds) do
 				bedwars["CombatController"].killSounds[i] = oldbedwarssoundtable.KILL
@@ -1987,6 +1879,8 @@ Render:CreateToggle({
 		end
 	end
 })
+
+------Utility Modules------
 local tiered = {}
 local nexttier = {}
 Utility:CreateToggle({
@@ -2011,6 +1905,7 @@ Utility:CreateToggle({
 		end
 	end
 })
+
 local lowestypos = math.huge
 AntiVoid = Utility:CreateToggle({
 	Name = "AntiVoid",
@@ -2019,8 +1914,7 @@ AntiVoid = Utility:CreateToggle({
 		if AntiVoidEnabled then
 			lowestypos = 99999
 			for i, v in pairs(game:GetService("CollectionService"):GetTagged("block")) do
-				local newray = workspace:Raycast(v.Position + Vector3.new(0, 800, 0), Vector3.new(0, -1000, 0),
-                    RaycastParams.new())
+				local newray = workspace:Raycast(v.Position + Vector3.new(0, 800, 0), Vector3.new(0, -1000, 0), RaycastParams.new())
 				if newray and newray.Position.Y <= lowestypos then
 					lowestypos = newray.Position.Y
 				end
@@ -2041,9 +1935,7 @@ AntiVoid = Utility:CreateToggle({
 			end)
 			AntiVoidConnection = AntiVoidPart.Touched:Connect(function(touchedpart)
 				if touchedpart.Parent == LocalPlayer.Character and IsAlive(LocalPlayer) and LocalPlayer.Character.Humanoid.Health > 0 then
-					LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(
-                        LocalPlayer.Character.HumanoidRootPart.Velocity.X, AntiVoidHeight,
-                        LocalPlayer.Character.HumanoidRootPart.Velocity.Z)
+					LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(LocalPlayer.Character.HumanoidRootPart.Velocity.X, AntiVoidHeight, LocalPlayer.Character.HumanoidRootPart.Velocity.Z)
 				end
 			end)
 		else
@@ -2084,9 +1976,12 @@ AntiVoid:CreateSlider({
 		AntiVoidTransparency = Callback
 	end
 })
-
-
-BedNukerEnabled = false 
+------BedNuker Module------
+local BedNukerEnabled = false
+local BedDistance = 30
+local BreakSpeed = 0.25
+local BedNukerAnimation = false
+local HighlightBlockEnabled = false
 
 BedNuker = Utility:CreateToggle({
 	Name = "BedNuker",
@@ -2102,20 +1997,19 @@ BedNuker = Utility:CreateToggle({
 					if IsAlive(LocalPlayer) then
 						local localPosition = LocalPlayer.Character.HumanoidRootPart.Position
 						local beds = GetBeds()
-						for i, bed in pairs(beds) do
+						for _, bed in pairs(beds) do
 							local mag = (bed.Position - localPosition).Magnitude
 							if mag < BedDistance and bedwars["BlockEngine"]:isBlockBreakable({
 								blockPosition = getserverpos(bed.Position)
-							}, LocalPlayer) and not ((bed:GetAttribute('BedShieldEndTime') or 0) > workspace:GetServerTimeNow()) then
-								break 
+							}, LocalPlayer) and not ((bed:GetAttribute("BedShieldEndTime") or 0) > workspace:GetServerTimeNow()) then
+								break
 							end
 						end
-
-						for i, bed in pairs(beds) do
+						for _, bed in pairs(beds) do
 							local mag = (bed.Position - localPosition).Magnitude
 							if mag < BedDistance and bedwars["BlockEngine"]:isBlockBreakable({
 								blockPosition = getserverpos(bed.Position)
-							}, LocalPlayer) and not ((bed:GetAttribute('BedShieldEndTime') or 0) > workspace:GetServerTimeNow()) then
+							}, LocalPlayer) and not ((bed:GetAttribute("BedShieldEndTime") or 0) > workspace:GetServerTimeNow()) then
 								print("Breaking bed at: " .. tostring(bed.Position))
 								local wasBroken = breakBlock(bed, BedDistance, HighlightBlockEnabled)
 								if not wasBroken then
@@ -2182,6 +2076,9 @@ BedNuker:CreateSlider({
 	end
 })
 
+------ChestStealer Module------
+local EnabledChestStealer = false
+
 ChestStealer = Utility:CreateToggle({
 	Name = "ChestStealer",
 	Callback = function(Callback)
@@ -2191,30 +2088,23 @@ ChestStealer = Utility:CreateToggle({
 				repeat
 					task.wait()
 					if IsAlive(LocalPlayer) then
-						for i, v in pairs(game:GetService("CollectionService"):GetTagged("chest")) do
+						for _, v in pairs(game:GetService("CollectionService"):GetTagged("chest")) do
 							if (LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude < 18 and v:FindFirstChild("ChestFolderValue") then
 								local chest = v:FindFirstChild("ChestFolderValue")
 								chest = chest and chest.Value or nil
 								local chestitems = chest and chest:GetChildren() or {}
 								if #chestitems > 0 then
-									game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild(
-                                        "@rbxts").net.out._NetManaged:FindFirstChild("Inventory/SetObservedChest")
-                                        :FireServer(chest)
-									for i3, v3 in pairs(chestitems) do
+									game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged:FindFirstChild("Inventory/SetObservedChest"):FireServer(chest)
+									for _, v3 in pairs(chestitems) do
 										if v3:IsA("Accessory") then
 											spawn(function()
 												pcall(function()
-													game:GetService("ReplicatedStorage").rbxts_include.node_modules
-                                                        :FindFirstChild("@rbxts").net.out._NetManaged:FindFirstChild(
-                                                        "Inventory/ChestGetItem"):InvokeServer(v.ChestFolderValue.Value,
-                                                        v3)
+													game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged:FindFirstChild("Inventory/ChestGetItem"):InvokeServer(v.ChestFolderValue.Value, v3)
 												end)
 											end)
 										end
 									end
-									game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild(
-                                        "@rbxts").net.out._NetManaged:FindFirstChild("Inventory/SetObservedChest")
-                                        :FireServer(nil)
+									game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged:FindFirstChild("Inventory/SetObservedChest"):FireServer(nil)
 								end
 							end
 						end
@@ -2224,7 +2114,12 @@ ChestStealer = Utility:CreateToggle({
 		end
 	end
 })
+
 ChestStealer:CreateInfo("Steals items from beds")
+
+------AutoKit Module------
+local AutoKitEnabled = false
+
 Utility:CreateToggle({
 	Name = "AutoKit",
 	Callback = function(Callback)
@@ -2233,21 +2128,19 @@ Utility:CreateToggle({
 			repeat
 				task.wait(0.1)
 				if IsAlive(LocalPlayer) then
-					infernal = GetItemNear("infernal_saber") -- not gona put a Kit Equipt check, since this is basically universal :) (with the sword ofc)
+					local infernal = GetItemNear("infernal_saber")
 					if infernal then
 						switchItem(infernal.tool)
-						game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out
-                            ._NetManaged.HellBladeRelease:FireServer({
+						game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.HellBladeRelease:FireServer({
 							["chargeTime"] = 0.5,
 							["player"] = LocalPlayer,
 							["weapon"] = infernal.tool
 						})
 					end
 					if RavenEquippedKit == "hannah" then
-						for i, v in pairs(game:GetService("Players"):GetChildren()) do
+						for _, v in pairs(game:GetService("Players"):GetChildren()) do
 							if v.Team ~= LocalPlayer.Team and IsAlive(v) and IsAlive(LocalPlayer) and not v.Character:FindFirstChildOfClass("ForceField") then
-								game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts")
-                                    .net.out._NetManaged.HannahPromptTrigger:InvokeServer({
+								game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.HannahPromptTrigger:InvokeServer({
 									["victimEntity"] = v.Character,
 									["user"] = LocalPlayer
 								})
@@ -2255,18 +2148,17 @@ Utility:CreateToggle({
 						end
 					elseif RavenEquippedKit == "metal_detector" then
 						local itemdrops = collectionService:GetTagged("hidden-metal")
-						for i, v in pairs(itemdrops) do
-							if IsAlive(LocalPlayer) and v.PrimaryPart and (LocalPlayer.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude <= 20 then
-								game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts")
-                                    .net.out._NetManaged.PickupMetalRemote:InvokeServer({
+						for _, v in pairs(itemdrops) do
+							if IsAlive(LocalPlayer) and v.PrimaryPart and (LocalPlayer.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude <= 20 then
+								game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.PickupMetalRemote:InvokeServer({
 									id = v:GetAttribute("Id")
 								})
 							end
 						end
 					elseif RavenEquippedKit == "bigman" then
-						local itemdrops = collectionService:GetTagged("treeOrb") --this
-						for i, v in pairs(itemdrops) do
-							if v:FindFirstChild("Spirit") and (LocalPlayer.character.HumanoidRootPart.Position - v.Spirit.Position).magnitude <= 20 then
+						local itemdrops = collectionService:GetTagged("treeOrb")
+						for _, v in pairs(itemdrops) do
+							if v:FindFirstChild("Spirit") and (LocalPlayer.Character.HumanoidRootPart.Position - v.Spirit.Position).Magnitude <= 20 then
 								if game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.ConsumeTreeOrb:InvokeServer({
 									treeOrbSecret = v:GetAttribute("TreeOrbSecret")
 								}) then
@@ -2276,11 +2168,10 @@ Utility:CreateToggle({
 							end
 						end
 					elseif RavenEquippedKit == "grim_reaper" then
-						local itemdrops = bedwars["GrimReaperController"].soulsByPosition --this
-						for i, v in pairs(itemdrops) do
-							if IsAlive(LocalPlayer) and LocalPlayer.Character:GetAttribute("Health") <= (LocalPlayer.Character:GetAttribute("MaxHealth") / 4) and v.PrimaryPart and (LocalPlayer.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude <= 120 and (not LocalPlayer.Character:GetAttribute("GrimReaperChannel")) then
-								game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts")
-                                    .net.out._NetManaged.ConsumeSoulRemote:InvokeServer({
+						local itemdrops = bedwars["GrimReaperController"].soulsByPosition
+						for _, v in pairs(itemdrops) do
+							if IsAlive(LocalPlayer) and LocalPlayer.Character:GetAttribute("Health") <= (LocalPlayer.Character:GetAttribute("MaxHealth") / 4) and v.PrimaryPart and (LocalPlayer.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude <= 120 and not LocalPlayer.Character:GetAttribute("GrimReaperChannel") then
+								game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.ConsumeSoulRemote:InvokeServer({
 									secret = v:GetAttribute("GrimReaperSoulSecret")
 								})
 								v:Destroy()
@@ -2288,9 +2179,8 @@ Utility:CreateToggle({
 						end
 					elseif RavenEquippedKit == "miner" then
 						if IsAlive(LocalPlayer) then
-							for i, v in pairs(collectionService:GetTagged("petrified-player")) do
-								game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts")
-                                    .net.out._NetManaged.MinerRemote:InvokeServer({
+							for _, v in pairs(collectionService:GetTagged("petrified-player")) do
+								game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@rbxts").net.out._NetManaged.MinerRemote:InvokeServer({
 									petrifyId = v:GetAttribute("PetrifyId")
 								})
 							end
@@ -2302,7 +2192,7 @@ Utility:CreateToggle({
 	end
 })
 
-
+------Scaffold Module------
 local adjacent = {}
 local ScaffoldEnabled = false
 local ScaffoldButtonEnabled = false
@@ -2498,6 +2388,10 @@ LongjumpButton.MouseButton1Click:Connect(function()
 	end
 end)
 
+------NameHider Module------
+local NameHiderEnabled = false
+local hideNametagConnection
+
 Utility:CreateToggle({
 	Name = "NameHider",
 	Callback = function(Callback)
@@ -2507,10 +2401,10 @@ Utility:CreateToggle({
 				hideNametagConnection:Disconnect()
 			end
 			hideNametagConnection = LocalPlayer.CharacterAdded:Connect(function(character)
-				setAttribute(character, 'NoNametag', true)
+				setAttribute(character, "NoNametag", true)
 			end)
 			if LocalPlayer.Character then
-				setAttribute(LocalPlayer.Character, 'NoNametag', true)
+				setAttribute(LocalPlayer.Character, "NoNametag", true)
 			end
 		else
 			if hideNametagConnection then
@@ -2518,11 +2412,14 @@ Utility:CreateToggle({
 				hideNametagConnection = nil
 			end
 			if LocalPlayer.Character then
-				setAttribute(LocalPlayer.Character, 'NoNametag', false)
+				setAttribute(LocalPlayer.Character, "NoNametag", false)
 			end
 		end
 	end
 })
+
+------NoSlowdown Module------
+local OldSetSpeedFunc
 
 Utility:CreateToggle({
 	Name = "NoSlowdown",
@@ -2530,8 +2427,8 @@ Utility:CreateToggle({
 		if Callback then
 			OldSetSpeedFunc = bedwars["SprintController"].setSpeed
 			bedwars["SprintController"].setSpeed = function(v, i)
-				if LocalPlayer.character.Humanoid then
-					LocalPlayer.character.Humanoid.WalkSpeed = math.max(20 * v.moveSpeedMultiplier, 20)
+				if LocalPlayer.Character and LocalPlayer.Character.Humanoid then
+					LocalPlayer.Character.Humanoid.WalkSpeed = math.max(20 * v.moveSpeedMultiplier, 20)
 				end
 			end
 			bedwars["SprintController"]:setSpeed(20)
@@ -2542,24 +2439,29 @@ Utility:CreateToggle({
 		end
 	end
 })
-repotedplayer = {}
+
+------AutoReport Module------
+local repotedplayer = {}
+
 Utility:CreateToggle({
 	Name = "AutoReport",
 	Callback = function(Callback)
 		AutoReport = Callback
 		if AutoReport then
-			for i, v in pairs(Players:GetPlayers()) do
+			for _, v in pairs(Players:GetPlayers()) do
 				if v ~= LocalPlayer and repotedplayer[v] ~= true then
 					task.wait(1)
-					game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@easy-games")
-                        :FindFirstChild("block-engine").node_modules:FindFirstChild("@rbxts").net.out._NetManaged
-                        .ReportPlayer:InvokeServer(v.UserId)
+					game:GetService("ReplicatedStorage").rbxts_include.node_modules:FindFirstChild("@easy-games"):FindFirstChild("block-engine").node_modules:FindFirstChild("@rbxts").net.out._NetManaged.ReportPlayer:InvokeServer(v.UserId)
 					repotedplayer[v] = true
 				end
 			end
 		end
 	end
 })
+
+------AntiAFK Module------
+local AntiAFKEnabled = false
+
 Utility:CreateToggle({
 	Name = "Anti AFK",
 	Callback = function(Callback)
@@ -2567,7 +2469,7 @@ Utility:CreateToggle({
 		if AntiAFKEnabled then
 			repeat
 				task.wait(10)
-				bedwars["ClientHandler"]:Get('AfkInfo'):SendToServer({
+				bedwars["ClientHandler"]:Get("AfkInfo"):SendToServer({
 					afk = false
 				})
 			until not AntiAFKEnabled
