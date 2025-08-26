@@ -707,11 +707,9 @@ AutoBuy = Blatant:CreateToggle({
                         
                         local purchaseMade = false
                         
-                        -- Handle sword purchases
                         if EnabledSwordsBuy then
                             local currentTier = getCurrentSwordTier()
                             
-                            -- Try to buy the best available sword (starting from tier 5)
                             for tier = 5, currentTier + 1, -1 do
                                 if swords[tier] then
                                     local canBuy, item, shopId = canBuyItem(swords[tier], shop.Name)
@@ -724,19 +722,16 @@ AutoBuy = Blatant:CreateToggle({
                             end
                         end
                         
-                        -- Handle armor purchases (only if no sword was purchased)
                         if EnabledArmorBuy and not purchaseMade then
                             local currentTier = getCurrentArmorTier()
                             
                             if currentTier == 0 then
-                                -- No armor, try to buy leather
                                 local canBuy, item, shopId = canBuyItem(armors[1], shop.Name)
                                 if canBuy then
                                     buyremote(item.itemType, shopId)
                                     purchaseMade = true
                                 end
                             elseif currentTier < 4 then
-                                -- Try to upgrade to next tier
                                 local canBuy, item, shopId = canBuyItem(armors[currentTier + 1], shop.Name)
                                 if canBuy then
                                     buyremote(item.itemType, shopId)
@@ -745,7 +740,6 @@ AutoBuy = Blatant:CreateToggle({
                             end
                         end
                         
-                        -- Add extra delay if purchase was made
                         if purchaseMade then
                             task.wait(0.5)
                         end
@@ -755,7 +749,6 @@ AutoBuy = Blatant:CreateToggle({
                         warn("AutoBuy error:", err)
                     end
                     
-                    -- Main loop delay - much more reasonable
                     task.wait(0.2)
                 end
             end)
@@ -2387,36 +2380,6 @@ LongjumpButton.MouseButton1Click:Connect(function()
 		loop = LoopManager.new()
 	end
 end)
-
-------NameHider Module------
-local NameHiderEnabled = false
-local hideNametagConnection
-
-Utility:CreateToggle({
-	Name = "NameHider",
-	Callback = function(Callback)
-		NameHiderEnabled = Callback
-		if NameHiderEnabled then
-			if hideNametagConnection then
-				hideNametagConnection:Disconnect()
-			end
-			hideNametagConnection = LocalPlayer.CharacterAdded:Connect(function(character)
-				setAttribute(character, "NoNametag", true)
-			end)
-			if LocalPlayer.Character then
-				setAttribute(LocalPlayer.Character, "NoNametag", true)
-			end
-		else
-			if hideNametagConnection then
-				hideNametagConnection:Disconnect()
-				hideNametagConnection = nil
-			end
-			if LocalPlayer.Character then
-				setAttribute(LocalPlayer.Character, "NoNametag", false)
-			end
-		end
-	end
-})
 
 ------NoSlowdown Module------
 local OldSetSpeedFunc
