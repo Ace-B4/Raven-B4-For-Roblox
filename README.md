@@ -2,7 +2,7 @@
   
 # Raven B4 For Roblox
 
-[![License](https://img.shields.io/badge/license-MIT-green?)](LICENSE)
+[![License](https://img.shields.io/badge/license-CC0%201.0-green)](LICENSE)
 [![Language](https://img.shields.io/badge/language-Lua-blue?)](https://www.lua.org/)
 
 Completely rewritten from scratch with the help of infinity yield and old raven B4 sources.
